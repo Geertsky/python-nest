@@ -12,7 +12,7 @@ source:
 build:
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  number: 0
+  number: 1
 requirements:
   host:
     - pip
@@ -22,9 +22,9 @@ requirements:
   run:
     - libblockdev
     - libbytesize
-    - dasbus
+    - dasbus >=1.7
     - packaging
-    - lvm2
+    - lvm2 >=2.03.17
     - util-linux
     - pygobject
     - pyparted
