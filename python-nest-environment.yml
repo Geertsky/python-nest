@@ -39,4 +39,5 @@ dependencies:
   - tzdata
   - util-linux
   - wheel
+  - xfsprogs
   - xz
