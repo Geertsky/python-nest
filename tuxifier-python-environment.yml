@@ -7,34 +7,35 @@ dependencies:
   - _libgcc_mutex
   - _openmp_mutex
   - blivet
-  - cryptsetup
-  - iniparser
-  - kmod
-  - libblockdev
-  - libbytesize
-  - libnvme
-  - ndctl
+  - btrfs-progs
   - bzip2
   - ca-certificates
   - coreutils
+  - cryptsetup
   - curl
   - dosfstools
   - e2fsprogs
   - gawk
+  - iniparser
+  - kmod
   - ld_impl_linux-64
   - libaio
+  - libblockdev
+  - libbytesize
   - libexpat
   - libffi
   - libgcc-ng
   - libgomp
   - libiconv
   - libnsl
+  - libnvme
   - libsqlite
   - libuuid
   - libxcrypt
   - libzlib
   - lvm2
   - ncurses
+  - ndctl
   - openssl
   - parted
   - pip
