@@ -60,7 +60,7 @@ conda install -n base conda-pack
 
 ## Building the python-nest environment
 
-In the dracut-tuxifier repository there is a conda environment file which can be use to build the python-nest environment.
+In the dracut-incubator repository there is a conda environment file which can be use to build the python-nest environment.
 Using the following command we can build the `python-nest` environment:
 
 ```bash
@@ -85,13 +85,13 @@ _`--dest-prefix /local/conda/envs/python-nest` is needed as the environment gets
 _`--format squashfs` The environment needs to be packed in a squashfs._<br>
 
 Once `conda-pack` is finished, we have a file `python-nest.squashfs` containing the python-nest environment.
-This packed environment needs to be available in the dracut module directory of `dracut-tuxifier`. This is `/lib/dracut/modules.d/94tuxifier`
+This packed environment needs to be available in the dracut module directory of `dracut-incubator`. This is `/lib/dracut/modules.d/94tuxifier`
 
 ```bash
 sudo mv python-nest.squashfs /lib/dracut/modules.d/94tuxifier
 ```
 
-Now we're ready to build the initramfs. See: [dracut-tuxifier](https://github.com/Geertsky/dracut-tuxifier)
+Now we're ready to build the initramfs. See: [dracut-incubator](https://github.com/Geertsky/dracut-incubator)
 ## python-nest devel branch
 
 The intention of this `tuxifier` project is to be as closely as possible compatible to the redhat anaconda kickstart installer.
