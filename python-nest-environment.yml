@@ -1,4 +1,4 @@
-name: tuxifier-python
+name: python-nest
 channels:
   - geertsky
   - conda-forge
