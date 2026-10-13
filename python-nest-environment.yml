@@ -34,6 +34,7 @@ dependencies:
   - libxcrypt
   - libzlib
   - lvm2
+  - mdadm
   - ncurses
   - ndctl
   - openssl
