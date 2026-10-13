@@ -1,0 +1,40 @@
+package:
+  name: iniparser
+  version: 4.2.6
+
+source:
+  url: https://gitlab.com/iniparser/iniparser/-/archive/v4.2.6/iniparser-v4.2.6.tar.gz
+  md5: 65bd235efd04df2bef728fcb01d68d6e
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage('iniparser', max_pin='x.x') }}
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+    - cmake
+    - ninja
+    - pkg-config
+test:
+  commands:
+    - test -f ${PREFIX}/lib/libiniparser.so
+    - test -f ${PREFIX}/include/iniparser/iniparser.h
+    - test -f ${PREFIX}/include/iniparser/dictionary.h
+    - test -f ${PREFIX}/lib/pkgconfig/iniparser.pc
+about:
+  home: https://gitlab.com/iniparser/iniparser
+  license: MIT
+  license_file: LICENSE
+  summary: A small, portable INI file parsing library for C
+  description: |
+    iniparser is a C library for parsing INI configuration files.
+    It provides access to configuration values as strings, integers,
+    floating-point numbers, and booleans, and has no external
+    library dependencies.
+  doc_url: https://iniparser.gitlab.io/iniparser/
+  dev_url: https://gitlab.com/iniparser/iniparser
+
+extra:
+  recipe-maintainers:
+    - Geertsky

@@ -1,0 +1,3 @@
+#!/bin/bash
+export OLD_LIBBLOCKDEV_CONFIG_DIR="$LIBBLOCKDEV_CONFIG_DIR"
+export LIBBLOCKDEV_CONFIG_DIR="$CONDA_PREFIX/etc/libblockdev/3/conf.d/"

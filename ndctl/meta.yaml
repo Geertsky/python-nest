@@ -1,0 +1,55 @@
+package:
+  name: ndctl
+  version: 85
+
+source:
+  url: https://github.com/pmem/ndctl/archive/refs/tags/v85.tar.gz
+  md5: c52cf5677b2b963f4f6643aa7de25d47
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage('ndctl', max_pin='x') }}
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+    - cmake
+    - meson
+    - ninja
+    - pkg-config
+  host:
+    - kmod
+    - libudev
+    - libuuid
+    - iniparser
+    - json-c
+    - keyutils
+    - liblzma-devel
+    - zlib
+test:
+  commands:
+    - ndctl --version
+    - daxctl --version
+    - test -f "$PREFIX/include/ndctl/libndctl.h"
+    - test -f "$PREFIX/lib/libndctl.so"
+    - test -f "$PREFIX/lib/pkgconfig/libndctl.pc"
+about:
+  home: https://github.com/pmem/ndctl
+  summary: Libraries and utilities for managing Linux persistent memory devices
+  description: |
+    ndctl provides libraries and command-line tools for managing the
+    Linux libnvdimm subsystem, including NVDIMM devices and namespaces.
+    It also includes daxctl and cxl tools and libraries for managing
+    Device DAX and Compute Express Link devices.
+  license: GPL-2.0-only AND LGPL-2.1-only AND CC0-1.0 AND MIT
+  license_file:
+    - COPYING
+    - LICENSES/preferred/GPL-2.0
+    - LICENSES/preferred/LGPL-2.1
+    - LICENSES/other/CC0-1.0
+    - LICENSES/other/MIT
+  dev_url: https://github.com/pmem/ndctl
+
+extra:
+  recipe-maintainers:
+    - Geertsky

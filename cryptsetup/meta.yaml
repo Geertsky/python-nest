@@ -1,0 +1,42 @@
+package:
+  name: cryptsetup
+  version: "2.8.8"
+
+source:
+  url: https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.8.tar.xz
+  md5sum: 36d480efae8ec6021a6a3c638d40f3b2
+
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage('cryptsetup', max_pin='x.x') }}
+
+requirements:
+  build:
+    - autoconf
+    - automake
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+  host:
+    - json-c
+    - lvm2
+    - libssh
+    - pkg-config
+    - popt
+    - util-linux
+
+test:
+  commands:
+    - cryptsetup --help
+    - integritysetup --help
+    - veritysetup --help
+    - test -f ${PREFIX}/lib/libcryptsetup.so.12.11.0
+    - test -f ${PREFIX}/lib/pkgconfig/libcryptsetup.pc
+about:
+  home: https://github.com/mbroz/cryptsetup
+  license: LGPLv2.1
+  doc_url: https://gitlab.com/cryptsetup/cryptsetup#documentation
+
+extra:
+  recipe-maintainers:
+    - Geertsky
