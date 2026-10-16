@@ -1,0 +1,100 @@
+{% set name = "rpm-tools" %}
+{% set version = "6.1.0" %}
+{% set major_minor = version.split('.')[:2] | join('.') %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: http://ftp.rpm.org/releases/rpm-{{ major_minor }}.x/rpm-{{ version }}.tar.bz2
+  sha256: f520810d27c74bf1c5d8b8885845c61e0c845f62d33e68b02e020633a8b62fe3
+  patches:
+    - 0001-Remove-fhardened-from-compiler-flags.patch
+    # rpm only builds a stable-ABI extension module, so it needs the Python
+    # Development.Module component rather than the full Development component
+    # (which implies Development.Embed and therefore libpython). Since CPython
+    # 3.15 conda-forge ships libpython separately and no longer pulls it in via
+    # python, so the unpatched configure step fails. Not yet submitted upstream.
+    - 0002-Only-require-the-Python-Development.Module-component.patch
+
+build:
+  # Higher than the conda-forge build (0) of the same version, so that the solver
+  # prefers this one when both channels are configured.
+  number: 100
+  skip: true  # [not linux]
+  # The Python bindings are a stable-ABI extension module (rpm compiles _rpm
+  # with Py_LIMITED_API), so one build against the oldest supported Python
+  # (python_min, see conda_build_config.yaml) serves every later version.
+  python_version_independent: true
+  script:
+    - mkdir build-dir
+    - cd build-dir
+    - cmake .. $CMAKE_ARGS -DWITH_SELINUX=OFF -DWITH_DBUS=OFF -DWITH_AUDIT=OFF -DENABLE_BDB_RO=ON
+    - cmake --build . --target install -- -j$CPU_COUNT
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ stdlib('c') }}
+    - make
+    - cmake
+    - pkg-config
+    - gettext
+    - scdoc
+    - libgomp
+  host:
+    - python {{ python_min }}.*
+    - python-abi3
+    - elfutils
+    - libarchive
+    - libcap
+    - libsqlite
+    - lua
+    - popt
+    - readline
+    - zstd
+    - liblzma-devel
+    - bzip2
+    - libiconv
+    - file
+    - zlib
+    - rpm-sequoia
+    - libacl
+  run:
+    - python
+    - {{ pin_compatible('elfutils') }}
+    - {{ pin_compatible('file') }}
+
+test:
+  imports:
+    - rpm
+  requires:
+    - python {{ python_min }}.*
+    - abi3audit
+  commands:
+    - abi3audit $SP_DIR/rpm/_rpm.so -s -v --assume-minimum-abi3 {{ python_min }}
+    - rpm --help
+    # rpm 6 dropped the full Berkeley DB backend; bdb_ro (read-only, no libdb) is
+    # what lets this rpm read the rpmdb of EL8 systems.
+    - rpm --showrc | grep -E 'available backends.*bdb_ro'
+
+about:
+  home: https://rpm.org/index.html
+  dev_url: https://github.com/rpm-software-management/rpm/
+  doc_url: https://rpm.org/documentation.html
+  license: GPL-2.0-or-later OR LGPL-2.0-or-later
+  license_file: COPYING
+  summary: The RPM Package Manager
+  description: |
+    The RPM Package Manager (RPM) is a powerful package management system capable of:
+
+    * building computer software from source into easily distributable packages
+    * installing, updating and uninstalling packaged software
+    * querying detailed information about the packaged software, whether installed or not
+    * verifying integrity of packaged software and resulting software installation
+
+extra:
+  recipe-maintainers:
+    - chrisburr

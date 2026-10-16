@@ -1,0 +1,25 @@
+From 547cfc36f2445ca227b957443308df32f1a7e0ea Mon Sep 17 00:00:00 2001
+From: Chris Burr <christopher.burr@cern.ch>
+Date: Fri, 17 Jul 2026 07:02:05 +0200
+Subject: [PATCH] Remove -fhardened from compiler flags
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5bb5db3..160785e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -432,7 +432,7 @@ if (ENABLE_ASAN OR ENABLE_UBSAN)
+ endif()
+ 
+ # try to ensure some compiler sanity and hardening options where supported
+-foreach (flag -fno-strict-overflow -fno-delete-null-pointer-checks -fhardened)
++foreach (flag -fno-strict-overflow -fno-delete-null-pointer-checks)
+ 	check_c_compiler_flag(${flag} compiler-supports${flag})
+ 	if (compiler-supports${flag})
+ 		add_compile_options(${flag})
+-- 
+2.55.0
+

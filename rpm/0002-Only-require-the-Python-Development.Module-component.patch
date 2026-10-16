@@ -1,0 +1,39 @@
+From 4d3486528925f432ac6412f88abf568db672c012 Mon Sep 17 00:00:00 2001
+From: Chris Burr <christopher.burr@cern.ch>
+Date: Sun, 6 Sep 2026 00:42:30 +0200
+Subject: [PATCH] Only require the Python Development.Module component
+
+The Python bindings are built with Python3_add_library(), which creates
+a MODULE library linked against Python3::Module, and _rpm is compiled
+against the stable ABI (Py_LIMITED_API). Nothing in the tree links
+against libpython, so the interpreter resolves those symbols when the
+module is loaded.
+
+Requesting the full Development component also implies
+Development.Embed, which requires the Python shared library to be
+present at configure time. That makes the build fail on distributions
+that ship the Python headers separately from libpython, even though rpm
+never embeds an interpreter.
+
+Development.Module has been available since CMake 3.18, which is already
+rpm's minimum required version.
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 160785e..6f8d8af 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -269,7 +269,7 @@ endif()
+ list(APPEND db_backends dummy)
+ 
+ if (ENABLE_PYTHON)
+-	find_package(Python3 3.10 COMPONENTS Interpreter Development REQUIRED)
++	find_package(Python3 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
+ endif()
+ 
+ if (WITH_CAP)
+-- 
+2.47.1
+
