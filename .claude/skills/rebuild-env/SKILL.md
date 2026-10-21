@@ -15,7 +15,11 @@ Steps (stop at the first failure and show its output):
 
 1. Make sure the newly built package is listed in `python-nest-environment.yml` (repo root); add it alphabetically if missing.
 2. Remove the old environment: `conda env remove -n python-nest -y`
-3. Create the new one: `conda env create -f python-nest-environment.yml`. (`conda env build` does not exist.) If the freshly built local package is not picked up, add `-c local`.
+3. Create the new one from the package list in `python-nest-environment.yml`, using only the local channel and conda-forge (`conda env create` takes no channel flags, and the geertsky channel's old libuuid/util-linux/e2fsprogs copies would shadow conda-forge):
+   ```bash
+   SPECS=$(sed -n '/dependencies:/,$p' python-nest-environment.yml | grep -- '^  - ' | sed 's/^  - //' | tr '\n' ' ')
+   conda create -n python-nest -y --override-channels -c file:///home/geert/miniforge3/conda-bld -c conda-forge $SPECS
+   ```
 4. Confirm the package is present: `conda list -n python-nest | grep -i <pkg>`
 5. Pack the environment, from `~/git/geertsky/dracut-incubator/94incubator`:
    ```bash
