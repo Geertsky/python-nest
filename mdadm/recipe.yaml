@@ -27,6 +27,7 @@ requirements:
     - make
     - pkg-config
   host:
+    - libudev <258  # el8 (kernel 4.18) lacks statx STATX_MNT_ID, which libudev >=260 requires; 258-261.1 also need glibc 2.34
   run: []
 
 tests:

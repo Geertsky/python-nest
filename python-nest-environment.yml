@@ -33,6 +33,7 @@ dependencies:
   - libnsl
   - libnvme
   - libsqlite
+  - libudev1 <258
   - libuuid
   - libxcrypt
   - libzlib
