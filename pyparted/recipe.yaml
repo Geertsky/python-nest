@@ -1,22 +1,25 @@
-{% set name = "pyparted" %}
-{% set version = "3.13.0" %}
+schema_version: 1
+
+context:
+  name: pyparted
+  version: "3.13.0"
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
   url: https://files.pythonhosted.org/packages/e7/53/b02306f89dc3eaf949659e8814545cde575867bc0175f60361809af7f71a/pyparted-3.13.0.tar.gz
   sha256: 443b59eb9ac63b8ca87094e02376646e172c7ea075f955f105889ca3485b06fd
 
 build:
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 1
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - pkg-config
   host:
     - parted
@@ -29,9 +32,9 @@ requirements:
     - python
 
 about:
-  home: https://github.com/dcantrell/pyparted/
+  homepage: https://github.com/dcantrell/pyparted/
   summary: Python bindings for GNU parted
-  license: GPL-2.0
+  license: GPL-2.0-only
   license_file: LICENSE
 
 extra:

@@ -1,0 +1,45 @@
+schema_version: 1
+
+context:
+  version: "1.9.0"
+
+package:
+  name: f2fs-tools
+  version: ${{ version }}
+
+source:
+  url: https://github.com/Sys-AI-Foundation/f2fs-tools/archive/refs/tags/v${{ version }}.tar.gz
+  md5: 36d480efae8ec6021a6a3c638d40f3b2
+
+build:
+  number: 4
+  script: build.sh
+
+requirements:
+  build:
+    - autoconf
+    - automake
+    - pkg-config
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - libtool
+  host:
+    - libuuid
+    - libselinux-conda-x86_64
+
+tests:
+  - script:
+      - f2fscrypt help add_key
+      - test -x $PREFIX/bin/mkfs.f2fs
+      - test -x $PREFIX/bin/f2fstat
+      - test -x $PREFIX/bin/fibmap.f2fs
+      - test -x $PREFIX/bin/parse.f2fs
+      - test -x $PREFIX/bin/fsck.f2fs
+
+about:
+  homepage: https://github.com/Sys-AI-Foundation/f2fs-tools
+  license_file: COPYING
+
+extra:
+  recipe-maintainers:
+    - Geertsky

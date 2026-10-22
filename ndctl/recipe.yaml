@@ -1,40 +1,46 @@
+schema_version: 1
+
 package:
   name: ndctl
-  version: 85
+  version: "85"
 
 source:
   url: https://github.com/pmem/ndctl/archive/refs/tags/v85.tar.gz
   md5: c52cf5677b2b963f4f6643aa7de25d47
+
 build:
-  number: 1
-  run_exports:
-    - {{ pin_subpackage('ndctl', max_pin='x') }}
+  number: 2
+  script: build.sh
+
 requirements:
+  run_exports:
+    - ${{ pin_subpackage('ndctl', upper_bound='x') }}
   build:
-    - {{ compiler('c') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - cmake
     - meson
     - ninja
     - pkg-config
   host:
     - kmod
-    - libudev
     - libuuid
     - iniparser
     - json-c
     - keyutils
     - liblzma-devel
     - zlib
-test:
-  commands:
-    - ndctl --version
-    - daxctl --version
-    - test -f "$PREFIX/include/ndctl/libndctl.h"
-    - test -f "$PREFIX/lib/libndctl.so"
-    - test -f "$PREFIX/lib/pkgconfig/libndctl.pc"
+
+tests:
+  - script:
+      - ndctl --version
+      - daxctl --version
+      - test -f "$PREFIX/include/ndctl/libndctl.h"
+      - test -f "$PREFIX/lib/libndctl.so"
+      - test -f "$PREFIX/lib/pkgconfig/libndctl.pc"
+
 about:
-  home: https://github.com/pmem/ndctl
+  homepage: https://github.com/pmem/ndctl
   summary: Libraries and utilities for managing Linux persistent memory devices
   description: |
     ndctl provides libraries and command-line tools for managing the
@@ -48,7 +54,7 @@ about:
     - LICENSES/preferred/LGPL-2.1
     - LICENSES/other/CC0-1.0
     - LICENSES/other/MIT
-  dev_url: https://github.com/pmem/ndctl
+  repository: https://github.com/pmem/ndctl
 
 extra:
   recipe-maintainers:

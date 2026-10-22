@@ -1,0 +1,44 @@
+schema_version: 1
+
+context:
+  name: mdadm
+  # check https://www.kernel.org/pub/linux/utils/raid/mdadm/ for the latest
+  version: "4.4"
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  url: https://www.kernel.org/pub/linux/utils/raid/mdadm/mdadm-${{ version }}.tar.xz
+  sha256: 9b488f35ed153df99924b5fe41eed380e8512de8f18a118628cacdd681b1d573
+
+build:
+  number: 1
+  script: build.sh
+  skip:
+    # mdadm uses the Linux md driver only
+    - not linux
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - make
+    - pkg-config
+  host:
+  run: []
+
+tests:
+  - script:
+      - mdadm --version
+      - mdadm --help
+      - test -f $PREFIX/share/man/man8/mdadm.8
+
+about:
+  homepage: https://git.kernel.org/pub/scm/utils/mdadm/mdadm.git
+  summary: Tool to create, assemble and manage Linux software RAID (md) arrays
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  documentation: https://raid.wiki.kernel.org/index.php/A_guide_to_mdadm
+  repository: https://git.kernel.org/pub/scm/utils/mdadm/mdadm.git

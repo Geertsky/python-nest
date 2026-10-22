@@ -1,13 +1,16 @@
-{% set name = "rpm-tools" %}
-{% set version = "6.1.0" %}
-{% set major_minor = version.split('.')[:2] | join('.') %}
+schema_version: 1
+
+context:
+  name: rpm-tools
+  version: "6.1.0"
+  major_minor: ${{ (version | split('.'))[:2] | join('.') }}
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
-  url: http://ftp.rpm.org/releases/rpm-{{ major_minor }}.x/rpm-{{ version }}.tar.bz2
+  url: http://ftp.rpm.org/releases/rpm-${{ major_minor }}.x/rpm-${{ version }}.tar.bz2
   sha256: f520810d27c74bf1c5d8b8885845c61e0c845f62d33e68b02e020633a8b62fe3
   patches:
     - 0001-Remove-fhardened-from-compiler-flags.patch
@@ -19,14 +22,14 @@ source:
     - 0002-Only-require-the-Python-Development.Module-component.patch
 
 build:
-  # Higher than the conda-forge build (0) of the same version, so that the solver
-  # prefers this one when both channels are configured.
-  number: 100
-  skip: true  # [not linux]
-  # The Python bindings are a stable-ABI extension module (rpm compiles _rpm
-  # with Py_LIMITED_API), so one build against the oldest supported Python
-  # (python_min, see conda_build_config.yaml) serves every later version.
-  python_version_independent: true
+  number: 1
+  skip:
+    - not linux
+  python:
+    # The Python bindings are a stable-ABI extension module (rpm compiles _rpm
+    # with Py_LIMITED_API), so one build against the oldest supported Python
+    # (python_min, see variants.yaml) serves every later version.
+    version_independent: true
   script:
     - mkdir build-dir
     - cd build-dir
@@ -35,17 +38,16 @@ build:
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ stdlib("c") }}
     - make
     - cmake
     - pkg-config
     - gettext
     - scdoc
-    - libgomp
   host:
-    - python {{ python_min }}.*
+    - python ${{ python_min }}.*
     - python-abi3
     - elfutils
     - libarchive
@@ -59,31 +61,40 @@ requirements:
     - bzip2
     - libiconv
     - file
+    - libmagic
+    - libgomp
     - zlib
     - rpm-sequoia
     - libacl
   run:
     - python
-    - {{ pin_compatible('elfutils') }}
-    - {{ pin_compatible('file') }}
+    - ${{ pin_compatible('elfutils') }}
+    - ${{ pin_compatible('file') }}
+    - ${{ pin_compatible('libmagic') }}
+    - libgomp
 
-test:
-  imports:
-    - rpm
-  requires:
-    - python {{ python_min }}.*
-    - abi3audit
-  commands:
-    - abi3audit $SP_DIR/rpm/_rpm.so -s -v --assume-minimum-abi3 {{ python_min }}
-    - rpm --help
-    # rpm 6 dropped the full Berkeley DB backend; bdb_ro (read-only, no libdb) is
-    # what lets this rpm read the rpmdb of EL8 systems.
-    - rpm --showrc | grep -E 'available backends.*bdb_ro'
+tests:
+  - python:
+      imports:
+        - rpm
+      python_version:
+        - ${{ python_min }}.*
+        - "*"
+  - script:
+      - abi3audit $SP_DIR/rpm/_rpm.so -s -v --assume-minimum-abi3 ${{ python_min }}
+    requirements:
+      run:
+        - abi3audit
+        - python ${{ python_min }}.*
+  - script:
+      - rpm --help
+      # rpm 6 dropped the full Berkeley DB backend; bdb_ro (read-only) is
+      # what lets this rpm read the rpmdb of EL8 systems.
 
 about:
-  home: https://rpm.org/index.html
-  dev_url: https://github.com/rpm-software-management/rpm/
-  doc_url: https://rpm.org/documentation.html
+  homepage: https://rpm.org/index.html
+  repository: https://github.com/rpm-software-management/rpm/
+  documentation: https://rpm.org/documentation.html
   license: GPL-2.0-or-later OR LGPL-2.0-or-later
   license_file: COPYING
   summary: The RPM Package Manager

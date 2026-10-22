@@ -1,3 +1,5 @@
+schema_version: 1
+
 package:
   name: dosfstools
   version: "4.2"
@@ -6,14 +8,18 @@ source:
   url: https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz
   md5: 49c8e457327dc61efab5b115a27b087a
 
+build:
+  script: build.sh
+
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+
 about:
-  home: https://github.com/dosfstools/dosfstools
+  homepage: https://github.com/dosfstools/dosfstools
   summary: dosfstools consists of the programs mkfs.fat, fsck.fat and fatlabel to create, check and label file systems of the FAT family.
-  license:  GPL-3.0 license
+  license: GPL-3.0-or-later
   license_file:
     - COPYING
 

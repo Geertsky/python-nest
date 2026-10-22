@@ -1,20 +1,25 @@
-{% set version = "7.1" %}
+schema_version: 1
+
+context:
+  version: "7.1"
+
 package:
   name: btrfs-progs
-  version: {{ version }}
+  version: ${{ version }}
 
 source:
-  url: https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v{{ version }}.tar.xz
-  md5sum: 5dbaaf17567022405d6fc9d0d185e812
+  url: https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v${{ version }}.tar.xz
+  md5: 5dbaaf17567022405d6fc9d0d185e812
 
 build:
-  number: 2
-  skip: true # [not unix]
+  number: 4
+  skip:
+    - not unix
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - make
     - pkg-config
   host:
@@ -27,24 +32,25 @@ requirements:
     - python
     - setuptools
     - zstd >=1.0.0
-    - libudev
   run:
     - e2fsprogs-libs
-test:
-  commands:
-    - btrfs --help
-    - btrfsck --help
-    - btrfs-convert --help
-    - btrfs-find-root --help
-    - btrfs-image --help
-    - test -x $PREFIX/bin/btrfs-map-logical
-    - test -x $PREFIX/bin/btrfs-select-super
-    - btrfstune --help
-    - test -x $PREFIX/bin/fsck.btrfs
-    - mkfs.btrfs --help
+
+tests:
+  - script:
+      - btrfs --help
+      - btrfsck --help
+      - btrfs-convert --help
+      - btrfs-find-root --help
+      - btrfs-image --help
+      - test -x $PREFIX/bin/btrfs-map-logical
+      - test -x $PREFIX/bin/btrfs-select-super
+      - btrfstune --help
+      - test -x $PREFIX/bin/fsck.btrfs
+      - mkfs.btrfs --help
+
 about:
-  home: https://xfs.wiki.kernel.org/
-  license: GPL-2.0
+  homepage: https://xfs.wiki.kernel.org/
+  license: GPL-2.0-only
   license_file:
     - COPYING
   summary: BTRFS COW Filesystem
@@ -55,8 +61,8 @@ about:
       - Self-healing - checksums for data and metadata, automatic detection of silent data corruptions
       - Data compression
       - Reflinks, fast and efficient file copies
-  doc_url: https://btrfs.readthedocs.io/en/latest/index.html
-  dev_url: https://btrfs.readthedocs.io/en/latest/dev/Development-notes.html
+  documentation: https://btrfs.readthedocs.io/en/latest/index.html
+  repository: https://btrfs.readthedocs.io/en/latest/dev/Development-notes.html
 
 extra:
   recipe-maintainers:

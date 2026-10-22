@@ -1,0 +1,52 @@
+schema_version: 1
+
+package:
+  name: kmod
+  version: "34.2"
+
+source:
+  url: https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.gz
+  md5: c34c4d5566bd69b1972879ff5498979a
+
+build:
+  number: 1
+  script: build.sh
+
+requirements:
+  run_exports:
+    - ${{ pin_subpackage('kmod', upper_bound='x') }}
+  build:
+    - meson
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - cmake
+    - pkg-config
+    - ninja
+  host:
+    - openssl
+    - xz
+    - zlib
+    - zstd
+
+tests:
+  - script:
+      - depmod   --help
+      - insmod   --help
+      - kmod     --help
+      - lsmod    --help
+      - modinfo  --help
+      - modprobe --help
+      - rmmod    --help
+      - test -f "${PREFIX}"/lib/libkmod.so
+      - test -f "${PREFIX}"/include/libkmod.h
+
+about:
+  homepage: https://github.com/kmod-project/kmod
+  summary: kmod is a set of tools to handle common tasks with Linux kernel modules like insert, remove, list, check properties, resolve dependencies and aliases.
+  license: GPL-2.0-only AND LGPL-2.1-only
+  license_file:
+    - COPYING
+
+extra:
+  recipe-maintainers:
+    - Geertsky

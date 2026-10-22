@@ -1,18 +1,22 @@
-{% set name = "blivet" %}
-{% set version = "3.14.1" %}
+schema_version: 1
+
+context:
+  name: blivet
+  version: "3.14.1"
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/blivet-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/blivet-${{ version }}.tar.gz
   sha256: 782894492153bae67a8219df08fd18c92db3eca5bf8a17ac8e3c7c32a24d6758
 
 build:
   noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 1
+
 requirements:
   host:
     - pip
@@ -22,7 +26,6 @@ requirements:
   run:
     - libblockdev
     - libbytesize
-    - dasbus >=1.7
     - packaging
     - lvm2 >=2.03.17
     - util-linux
@@ -30,18 +33,17 @@ requirements:
     - pyparted
     - python
     - pyudev
-test:
-  imports:
-    - blivet
-  commands:
-    - pip check
-  requires:
-    - pip
+
+tests:
+  - python:
+      imports:
+        - blivet
+      pip_check: true
 
 about:
-  home: http://github.com/storaged-project/blivet
+  homepage: http://github.com/storaged-project/blivet
   summary: Python module for system storage configuration
-  license: GPL-2.0 AND LGPL-2.1
+  license: GPL-2.0-only AND LGPL-2.1-only
   license_file:
     - COPYING
     - COPYING.LESSER

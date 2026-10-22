@@ -1,0 +1,121 @@
+schema_version: 1
+
+package:
+  name: libblockdev
+  version: "3.5.0"
+
+source:
+  git: https://github.com/storaged-project/libblockdev.git
+  rev: 035a8aebfefe54544667ce25c3ce2323f9a3a80d
+
+build:
+  number: 5
+  script: build.sh
+
+requirements:
+  run_exports:
+    - ${{ pin_subpackage('libblockdev', upper_bound='x.x') }}
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - pkg-config
+    - make
+    - autoconf
+    - automake
+    - libtool
+    - autoconf-archive
+  host:
+    - cryptsetup
+    - e2fsprogs
+    - glib
+    - gobject-introspection
+    - keyutils
+    - kmod
+    - yaml
+    - zlib
+    - liblzma-devel
+    - python
+    - util-linux
+    - libbytesize
+    - libdevmapper
+    - libnvme
+    - libuuid
+    - json-glib
+    - lvm2
+    - ndctl
+    - parted
+  run:
+    - python
+    - pygobject
+    - libbytesize
+    - ${{ pin_compatible('parted', upper_bound='x.x') }}
+    - lvm2
+    - e2fsprogs
+    # possible for software raid: mdadm
+
+tests:
+  - script:
+      - test -f $PREFIX/etc/libblockdev/3/conf.d/00-default.cfg
+      - test -f $PREFIX/include/blockdev/blockdev.h
+      - test -f $PREFIX/include/blockdev/btrfs.h
+      - test -f $PREFIX/include/blockdev/crypto.h
+      - test -f $PREFIX/include/blockdev/dbus.h
+      - test -f $PREFIX/include/blockdev/dev_utils.h
+      - test -f $PREFIX/include/blockdev/dm.h
+      - test -f $PREFIX/include/blockdev/exec.h
+      - test -f $PREFIX/include/blockdev/extra_arg.h
+      - test -f $PREFIX/include/blockdev/fs/btrfs.h
+      - test -f $PREFIX/include/blockdev/fs/exfat.h
+      - test -f $PREFIX/include/blockdev/fs/ext.h
+      - test -f $PREFIX/include/blockdev/fs/f2fs.h
+      - test -f $PREFIX/include/blockdev/fs/generic.h
+      - test -f $PREFIX/include/blockdev/fs.h
+      - test -f $PREFIX/include/blockdev/fs/mount.h
+      - test -f $PREFIX/include/blockdev/fs/nilfs.h
+      - test -f $PREFIX/include/blockdev/fs/ntfs.h
+      - test -f $PREFIX/include/blockdev/fs/udf.h
+      - test -f $PREFIX/include/blockdev/fs/vfat.h
+      - test -f $PREFIX/include/blockdev/fs/xfs.h
+      - test -f $PREFIX/include/blockdev/logging.h
+      - test -f $PREFIX/include/blockdev/loop.h
+      - test -f $PREFIX/include/blockdev/lvm.h
+      - test -f $PREFIX/include/blockdev/mdraid.h
+      - test -f $PREFIX/include/blockdev/module.h
+      - test -f $PREFIX/include/blockdev/mpath.h
+      - test -f $PREFIX/include/blockdev/nvdimm.h
+      - test -f $PREFIX/include/blockdev/nvme.h
+      - test -f $PREFIX/include/blockdev/part.h
+      - test -f $PREFIX/include/blockdev/plugins.h
+      - test -f $PREFIX/include/blockdev/sizes.h
+      - test -f $PREFIX/include/blockdev/swap.h
+      - test -f $PREFIX/include/blockdev/utils.h
+      - test -f $PREFIX/lib/girepository-1.0/BlockDev-3.0.typelib
+      - test -f $PREFIX/lib/libbd_btrfs.so
+      - test -f $PREFIX/lib/libbd_crypto.so
+      - test -f $PREFIX/lib/libbd_dm.so
+      - test -f $PREFIX/lib/libbd_fs.so
+      - test -f $PREFIX/lib/libbd_loop.so
+      - test -f $PREFIX/lib/libbd_lvm.so
+      - test -f $PREFIX/lib/libbd_mdraid.so
+      - test -f $PREFIX/lib/libbd_mpath.so
+      - test -f $PREFIX/lib/libbd_nvdimm.so
+      - test -f $PREFIX/lib/libbd_nvme.so
+      - test -f $PREFIX/lib/libbd_part.so
+      - test -f $PREFIX/lib/libbd_swap.so
+      - test -f $PREFIX/lib/libbd_utils.so
+      - test -f $PREFIX/lib/libblockdev.so
+      - test -f $PREFIX/lib/pkgconfig/blockdev.pc
+      - test -f $PREFIX/lib/pkgconfig/blockdev-utils.pc
+      - test -f $PREFIX/lib/python3.13/site-packages/gi/overrides/BlockDev.py
+      - test -f $PREFIX/share/gir-1.0/BlockDev-3.0.gir
+
+about:
+  homepage: https://github.com/storaged-project/libblockdev
+  summary: libblockdev is a C library supporting GObject introspection for manipulation of block devices.
+  license: LGPL-2.1-only
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - Geertsky

@@ -1,18 +1,23 @@
+schema_version: 1
+
 package:
   name: libbytesize
-  version: 2.12
+  version: "2.12"
 
 source:
   url: https://github.com/storaged-project/libbytesize/releases/download/2.12/libbytesize-2.12.tar.gz
   md5: 5314b773b20d1f3acdf3b2bf0c92549f
+
 build:
   number: 2
-  run_exports:
-    - {{ pin_subpackage('libbytesize', max_pin='x.x') }}
+  script: build.sh
+
 requirements:
+  run_exports:
+    - ${{ pin_subpackage('libbytesize', upper_bound='x.x') }}
   build:
-    - {{ compiler('c') }}
-    - {{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
   host:
     - gmp
     - mpfr
@@ -23,16 +28,17 @@ requirements:
   run:
     - python
 
-test:
-  commands:
-    - bscalc --help </dev/null
-    - test -f ${PREFIX}/lib/libbytesize.so.1.0.0
-    - test -f ${PREFIX}/include/bytesize/bs_size.h
-    - test -f ${PREFIX}/lib/pkgconfig/bytesize.pc
+tests:
+  - script:
+      - bscalc --help </dev/null
+      - test -f ${PREFIX}/lib/libbytesize.so.1.0.0
+      - test -f ${PREFIX}/include/bytesize/bs_size.h
+      - test -f ${PREFIX}/lib/pkgconfig/bytesize.pc
+
 about:
-  home: https://github.com/storaged-project/libbytesize
+  homepage: https://github.com/storaged-project/libbytesize
   summary: The goal of this project is to provide a tiny library that would facilitate the common operations with sizes in bytes.
-  license: LGPL-2.1
+  license: LGPL-2.1-only
   license_file:
     - LICENSE
 
