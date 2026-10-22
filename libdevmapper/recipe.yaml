@@ -1,0 +1,93 @@
+schema_version: 1
+
+context:
+  version: "2.03.41"
+
+recipe:
+  name: lvm2-split
+  version: ${{ version }}
+
+source:
+  url: https://gitlab.com/lvmteam/lvm2/-/archive/v2_03_41/lvm2-v2_03_41.tar.gz
+  sha256: e80564b8df674f8fe8db6c6fc6977f245eed46a1e21d74af0545bfbdeb92f59b
+
+build:
+  number: 0
+
+# configure/make/install runs once; the outputs below pick files from the result
+outputs:
+  - staging:
+      name: lvm2-split-build
+    build:
+      script: build.sh
+    requirements:
+      build:
+      - ${{ compiler('c') }}
+      - ${{ stdlib('c') }}
+      - autoconf >=2.69
+      - autoconf-archive
+      - automake
+      - make
+      - pkg-config
+      host:
+      - libaio
+      - util-linux
+
+  - package:
+      name: libdevmapper
+    inherit: lvm2-split-build
+    build:
+      skip:
+        - not linux
+      files:
+        - lib/libdevmapper.so*
+        - lib/pkgconfig/devmapper.pc
+        - include/libdevmapper.h
+    requirements:
+      run_exports:
+        - ${{ pin_subpackage('libdevmapper', upper_bound='x.x') }}
+    tests:
+      - script:
+          - test -f "${PREFIX}/lib/libdevmapper.so"
+          - test -f "${PREFIX}/lib/pkgconfig/devmapper.pc"
+          - test -f "${PREFIX}/include/libdevmapper.h"
+
+  - package:
+      name: lvm2
+    inherit: lvm2-split-build
+    build:
+      skip:
+        - not linux
+      files:
+        include:
+          - bin/**/*
+          - lib/**/*
+          - libexec/**/*
+          - share/**/*
+          - etc/**/*
+        exclude:
+          - lib/libdevmapper.so*
+          - lib/pkgconfig/devmapper.pc
+          - include/libdevmapper.h
+    requirements:
+      run:
+        - ${{ pin_subpackage('libdevmapper', exact=True) }}
+    tests:
+      - script:
+          - lvm version
+          - pvcreate --help
+          - vgcreate --help
+          - lvcreate --help
+
+about:
+  homepage: https://sourceware.org/dm/
+  repository: https://sourceware.org/git/lvm2.git
+  documentation: https://www.sourceware.org/dm/
+  license: LGPL-2.1-only
+  license_file:
+    - COPYING.LIB
+  summary: Userspace library for the Linux device-mapper component.
+
+extra:
+  recipe-maintainers:
+    - Geertsky
