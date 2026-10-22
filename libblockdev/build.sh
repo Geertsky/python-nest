@@ -2,6 +2,8 @@
 export PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig:${PREFIX}/share/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 export CPPFLAGS="${CPPFLAGS:-} $(pkg-config --cflags glib-2.0)"
 export CPATH="$PREFIX/include${CPATH:+:$CPATH}"
+export ACLOCAL_PATH="${PREFIX}/share/aclocal${ACLOCAL_PATH:+:${ACLOCAL_PATH}}"
+./autogen.sh
 ./configure --prefix=$PREFIX      \
             --sbindir=${PREFIX}/bin \
             --bindir=${PREFIX}/bin \
