@@ -20,9 +20,13 @@ source:
     # 3.15 conda-forge ships libpython separately and no longer pulls it in via
     # python, so the unpatched configure step fails. Not yet submitted upstream.
     - 0002-Only-require-the-Python-Development.Module-component.patch
+    # rpm replaces PATH for scriptlets and helpers such as sysusers.sh, so with
+    # --root in the tuxifier initramfs they cannot find touch, basename and xargs
+    # from the python-nest environment. Keep the PATH rpm was started with.
+    - 0003-Run-scriptlets-with-the-PATH-rpm-was-started-with.patch
 
 build:
-  number: 1
+  number: 2
   skip:
     - not linux
   python:

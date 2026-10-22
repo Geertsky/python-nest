@@ -16,6 +16,7 @@ dependencies:
   - dosfstools
   - e2fsprogs
   - f2fs-tools
+  - findutils
   - gawk
   - iniparser
   - kmod

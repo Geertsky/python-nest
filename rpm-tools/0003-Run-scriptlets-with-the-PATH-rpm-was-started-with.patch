@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Geert Geurts <geert@verweggistan.eu>
+Date: Wed, 21 Oct 2026 18:30:00 +0200
+Subject: [PATCH] Run scriptlets with the PATH rpm was started with
+
+rpm replaces PATH with a fixed /sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin
+before it runs scriptlets and helpers such as sysusers.sh, unless
+%_install_script_path is defined.
+
+The tuxifier installer runs rpm from a conda environment (python-nest) in an
+initramfs, with --root pointing at the new system. sysusers.sh needs touch,
+basename and xargs. They are in the environment's bin directory, which the
+caller puts on PATH, but not in the initramfs's /usr/bin, nor in the target
+root before coreutils and findutils are installed. With the fixed PATH they
+fail with "command not found".
+
+Use the PATH from the environment when it is set. An explicit
+%_install_script_path still takes precedence.
+---
+ lib/rpmscript.cc | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/lib/rpmscript.cc b/lib/rpmscript.cc
+--- a/lib/rpmscript.cc
++++ b/lib/rpmscript.cc
+@@ -273,6 +273,20 @@
+ 
+     {   char *ipath = rpmExpand("%{_install_script_path}", NULL);
+ 	const char *path = SCRIPT_PATH;
++	const char *envpath = getenv("PATH");
++
++	/*
++	 * Prefer the PATH rpm itself was started with over the built-in
++	 * default. When rpm runs from a conda environment (python-nest in the
++	 * tuxifier initramfs) with --root, the helpers it runs, such as
++	 * sysusers.sh, need touch, basename and xargs. Those live in the
++	 * environment's bin directory and exist in neither the initramfs's
++	 * /usr/bin nor, early in the transaction, in the target root, so with
++	 * the fixed default PATH they are "command not found". An explicit
++	 * %_install_script_path below still takes precedence.
++	 */
++	if (envpath && *envpath)
++	    path = envpath;
+ 
+ 	if (ipath && ipath[5] != '%')
+ 	    path = ipath;
+-- 
+2.50.0
