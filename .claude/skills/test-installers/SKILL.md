@@ -1,7 +1,7 @@
 ---
 name: test-installers
-description: Validate freshly built initramfs images (and so the python-nest change behind them) by creating/booting the six libvirt VMs installer-rocky{8,9,10}-{bios,uefi} and running the tuxifier-playbook on each twice - first with -e tuxifier_reinstall=true, then without. Use after /rebuild-initramfs, or when asked to test or validate the initramfs / the installer VMs. Optional argument - VM names to test instead of all six.
-argument-hint: "[installer-rocky9-uefi ...]"
+description: Validate freshly built initramfs images (and so the python-nest change behind them) by creating/booting the six libvirt VMs installer{8,9,10}-{bios,uefi} and running the tuxifier-playbook on each twice - first with -e tuxifier_reinstall=true, then without. Use after /rebuild-initramfs, or when asked to test or validate the initramfs / the installer VMs. Optional argument - VM names to test instead of all six.
+argument-hint: "[installer9-uefi ...]"
 ---
 
 # Test the initramfs on the six installer VMs
@@ -10,25 +10,42 @@ The VMs direct-kernel-boot the images that `/rebuild-initramfs` writes to `~/wor
 
 | VM | distro | firmware | MAC | IP (pinned) |
 |---|---|---|---|---|
-| installer-rocky8-bios  | rocky8  | bios | 52:54:00:a8:00:01 | 192.168.122.101 |
-| installer-rocky8-uefi  | rocky8  | uefi | 52:54:00:a8:00:02 | 192.168.122.102 |
-| installer-rocky9-bios  | rocky9  | bios | 52:54:00:06:85:19 | 192.168.122.103 |
-| installer-rocky9-uefi  | rocky9  | uefi | 52:54:00:3c:9e:fc | 192.168.122.104 |
-| installer-rocky10-bios | rocky10 | bios | 52:54:00:aa:10:01 | 192.168.122.105 |
-| installer-rocky10-uefi | rocky10 | uefi | 52:54:00:aa:10:02 | 192.168.122.106 |
+| installer8-bios  | rocky8  | bios | 52:54:00:eb:fe:63 | 192.168.122.101 |
+| installer8-uefi  | rocky8  | uefi | 52:54:00:19:97:98 | 192.168.122.102 |
+| installer9-bios  | rocky9  | bios | 52:54:00:ff:07:7e | 192.168.122.110 |
+| installer9-uefi  | rocky9  | uefi | 52:54:00:d9:f3:bc | 192.168.122.104 |
+| installer10-bios | rocky10 | bios | 52:54:00:7d:b4:c1 | 192.168.122.105 |
+| installer10-uefi | rocky10 | uefi | 52:54:00:58:be:25 | 192.168.122.106 |
 
-The IPs are pinned as `<host>` entries in the libvirt network `default` and listed in `/etc/hosts`. The playbook is `~/git/geertsky/tuxifier-playbook/playbook.yml` (`hosts: installer`; the group is in `inventory/inventory.ini`, host_vars `installer-<vm>.yml`). Always pass `-l`. Run `ansible`/`ansible-playbook` from the default shell environment, not conda base.
+The IPs are pinned as `<host>` entries in the libvirt network `default` and listed in `/etc/hosts`. The playbook is `~/git/geertsky/tuxifier-playbook/playbook.yml` (`hosts: installer`; the group is in `inventory/inventory.ini`, host_vars `<vm>.yml`, soft-links to `rocky<N>-{bios,uefi}.yml`). Always pass `-l`. Run `ansible`/`ansible-playbook` from the default shell environment, not conda base.
 
-`$ARGUMENTS` optionally names the VMs to test; without it test all six. The VMs run **in parallel**: each has 2 GiB RAM, so six fit on the host. Every ansible call below therefore takes all tested VMs at once (`-l` with a comma-separated list, e.g. `-l installer-rocky8-bios,installer-rocky8-uefi,...`, or `-l installer` for all six) and `-f 6` so none waits for another.
+`$ARGUMENTS` optionally names the VMs to test; without it test all six. The VMs run **in parallel**: each has 2 GiB RAM, so six fit on the host. Every ansible call below therefore takes all tested VMs at once (`-l` with a comma-separated list, e.g. `-l installer8-bios,installer8-uefi,...`, or `-l installer` for all six) and `-f 6` so none waits for another.
 
 **Run 1 wipes the disk of every tested VM** (`tuxifier_reinstall=true`). They are test VMs, but if the user did not ask for the test, confirm first.
 
 Success means: for every tested VM both playbook runs finish with `failed=0 unreachable=0`. Only then conclude that the initramfs is valid for that distro/firmware and the rebuilt package works end to end. Otherwise report the failing VM/task output and do not claim success. A missing module/command in the initramfs environment points to the python-nest change.
 
-## Step 0: Preconditions
+## Step 0: Open the tmux session (right after the command is issued, before anything else)
+
+The user wants to watch the playbook output live, so every long run happens in a tmux session on a socket in their home directory (the default socket under `/tmp` is not reliably shared with the user's shell). Open it first and show the attach command in your reply before doing any other work:
+
+```bash
+SOCK=~/.tuxifier-tmux.sock
+SCRATCH=<scratchpad directory>
+tmux -S $SOCK kill-session -t tuxifier 2>/dev/null
+tmux -S $SOCK new-session -d -s tuxifier -n shell
+```
+
+Then tell the user, as the first line of your answer:
+
+> Watch the run with: `tmux -S ~/.tuxifier-tmux.sock attach -t tuxifier` (detach with Ctrl-b d; do not press Ctrl-c)
+
+Each playbook run (Step 3.3 and 3.5) is started as its own window of this session, with its output also written to `$SCRATCH/<run>.log`; `$SCRATCH/current.log` is a symlink to the log of the run in progress, so `tail -f` works too. The window ends in `exec bash`, so the output stays readable after the run finished until the user types `exit`. If `tmux` is missing, ask the user to install it.
+
+## Step 1: Preconditions
 
 - The images `~/work/tuxifier/rocky*/ansible-tuxifier-initramfs-*.img` are newer than `~/git/geertsky/dracut-incubator/94incubator/python-nest.squashfs` (else run `/rebuild-initramfs` first).
-- For rocky9 and rocky10 the install repo answers: `curl -sI -m 5 http://192.168.122.1/rhel/9.8/BaseOS/ | head -1` (and `.../rhel/10.2/BaseOS/`) is `200`. The rocky9 host_vars use it; rocky8 and rocky10 may use the public mirrors, which need internet access.
+- The install repos answer: `curl -sI -m 5 http://192.168.122.1/rocky/<N>/BaseOS/x86_64/os/repodata/repomd.xml | head -1` is `200` for N = 8, 9 and 10 (all host_vars use this local mirror).
 - Network pins and `/etc/hosts` (set up once; add what is missing):
   ```bash
   virsh -c qemu:///system net-dumpxml default | grep "mac='<MAC>'"
@@ -37,11 +54,11 @@ Success means: for every tested VM both playbook runs finish with `failed=0 unre
   ```
   A pin only applies on the VM's next DHCP lease, so a VM started before the pin existed needs a destroy + start.
 
-## Step 1: Make sure the VMs exist and use the current images
+## Step 2: Make sure the VMs exist and use the current images
 
 For each VM to test (idempotent):
 
-1. Legacy names: if domain `installer-bios` / `installer-uefi` exists and `installer-rocky9-bios` / `installer-rocky9-uefi` does not, `virsh destroy` it if running and `virsh domrename installer-bios installer-rocky9-bios` (resp. uefi). The disk file keeps its old name.
+1. Legacy names: if domain `installer-bios` / `installer-uefi` exists and `installer9-bios` / `installer9-uefi` does not, `virsh destroy` it if running and `virsh domrename installer-bios installer9-bios` (resp. uefi). The disk file keeps its old name.
 2. Expected kernel and initramfs for the VM's distro (`<rockyN>` = rocky8, rocky9 or rocky10; `V=$(cat ~/work/tuxifier/<rockyN>/VERSION)`):
    - kernel `~/work/tuxifier/<rockyN>/boot/vmlinuz-$V`
    - initrd `~/work/tuxifier/<rockyN>/ansible-tuxifier-initramfs-$V.img`
@@ -58,7 +75,7 @@ For each VM to test (idempotent):
 4. If the domain exists, compare `<kernel>`/`<initrd>` in `virsh dumpxml <VM>` with the expected paths. If they differ (a newer kernel/initramfs was generated), destroy the VM if running and fix them via `virsh dumpxml --inactive`, `sed`, `virsh define`.
 5. Memory must be 2 GiB (the renamed rocky9 pair was created with 8 GiB). If `virsh dominfo <VM>` shows otherwise, destroy the VM if running and run `virsh setmaxmem <VM> 2G --config && virsh setmem <VM> 2G --config`.
 
-## Step 2: Run (all tested VMs in parallel; stop at the first failure and show its output)
+## Step 3: Run (all tested VMs in parallel; stop at the first failure and show its output)
 
 `<VMS>` below is the comma-separated list of the tested VMs.
 
@@ -66,19 +83,25 @@ For each VM to test (idempotent):
 2. Wait until every initramfs answers Ansible (each shows "Waiting for Ansible"):
    ```bash
    cd ~/git/geertsky/tuxifier-playbook
-   ansible <VMS> -m ansible.builtin.wait_for_connection -a 'timeout=300'
+   ansible <VMS> -m ansible.builtin.wait_for_connection -a 'timeout=300' \
+     -e ansible_python_interpreter=/local/conda/envs/python-nest/bin/python3
    ```
+   The interpreter must be given explicitly: the initramfs has no `python3` on its default `PATH` (only the playbook's role sets `PATH` to the python-nest environment), so a plain `wait_for_connection` times out with "timed out waiting for ping module test". If the VM is still booting, ssh answers before the environment is usable; `ansible <VMS> -m ansible.builtin.raw -a true` is a Python-free reachability check.
 3. Run 1, reinstall (long: it installs six OSes at once; run it in the background and wait for it to exit):
    ```bash
-   ansible-playbook -f 6 -l <VMS> playbook.yml -e tuxifier_reinstall=true
+   rm -f $SCRATCH/run1.done; ln -sf $SCRATCH/run1.log $SCRATCH/current.log
+   tmux -S $SOCK new-window -t tuxifier -n run1 "cd ~/git/geertsky/tuxifier-playbook && ansible-playbook -f 6 -l <VMS> playbook.yml -e tuxifier_reinstall=true 2>&1 | tee $SCRATCH/run1.log; touch $SCRATCH/run1.done; exec bash"
+   until [ -e $SCRATCH/run1.done ]; do sleep 10; done
    ```
-   Check the `PLAY RECAP` per VM.
+   Check the `PLAY RECAP` per VM in `$SCRATCH/run1.log`.
 4. `continue_install` is false, so each VM powers off by itself. Wait until `virsh domstate <VM>` is `shut off` for all (up to ~5 min after its host finished), then repeat steps 1 and 2 to boot them from the initramfs again.
 5. Run 2, no reinstall (the storage layout already exists and must match, nothing may break):
    ```bash
-   ansible-playbook -f 6 -l <VMS> playbook.yml
+   rm -f $SCRATCH/run2.done; ln -sf $SCRATCH/run2.log $SCRATCH/current.log
+   tmux -S $SOCK new-window -t tuxifier -n run2 "cd ~/git/geertsky/tuxifier-playbook && ansible-playbook -f 6 -l <VMS> playbook.yml 2>&1 | tee $SCRATCH/run2.log; touch $SCRATCH/run2.done; exec bash"
+   until [ -e $SCRATCH/run2.done ]; do sleep 10; done
    ```
-   Check the `PLAY RECAP` per VM.
+   Check the `PLAY RECAP` per VM in `$SCRATCH/run2.log`.
 
 If run 1 fails on some VMs, still run steps 4-5 for the VMs that succeeded, so the report covers every VM.
 
