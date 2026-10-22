@@ -12,6 +12,7 @@ dependencies:
   - coreutils
   - cryptsetup
   - curl
+  - dasbus
   - dosfstools
   - e2fsprogs
   - f2fs-tools

@@ -26,6 +26,7 @@ requirements:
   run:
     - libblockdev
     - libbytesize
+    - dasbus >=1.7
     - packaging
     - lvm2 >=2.03.17
     - util-linux

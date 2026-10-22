@@ -1,0 +1,46 @@
+schema_version: 1
+
+context:
+  name: dasbus
+  version: "1.7"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/dasbus-${{ version }}.tar.gz
+  sha256: a8850d841adfe8ee5f7bb9f82cf449ab9b4950dc0633897071718e0d0036b6f6
+
+build:
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - setuptools
+    - wheel
+    - python >=3.6
+  run:
+    - python >=3.6
+    - pygobject
+
+tests:
+  - python:
+      imports:
+        - dasbus
+        - dasbus.client
+        - gi
+      pip_check: true
+
+about:
+  homepage: https://github.com/rhinstaller/dasbus
+  summary: DBus library in Python 3
+  license: LGPL-2.1-only
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Geertsky
