@@ -35,6 +35,8 @@ build:
     # (python_min, see variants.yaml) serves every later version.
     version_independent: true
   script:
+    # rpm 6 dropped the full Berkeley DB backend; -DENABLE_BDB_RO=ON keeps the
+    # read-only one (bdb_ro), which lets this rpm read the rpmdb of EL8 systems.
     - mkdir build-dir
     - cd build-dir
     - cmake .. $CMAKE_ARGS -DWITH_SELINUX=OFF -DWITH_DBUS=OFF -DWITH_AUDIT=OFF -DENABLE_BDB_RO=ON
@@ -92,8 +94,6 @@ tests:
         - python ${{ python_min }}.*
   - script:
       - rpm --help
-      # rpm 6 dropped the full Berkeley DB backend; bdb_ro (read-only) is
-      # what lets this rpm read the rpmdb of EL8 systems.
 
 about:
   homepage: https://rpm.org/index.html

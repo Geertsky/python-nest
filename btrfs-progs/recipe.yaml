@@ -50,7 +50,7 @@ tests:
       - mkfs.btrfs --help
 
 about:
-  homepage: https://xfs.wiki.kernel.org/
+  homepage: https://btrfs.readthedocs.io/
   license: GPL-2.0-only
   license_file:
     - COPYING

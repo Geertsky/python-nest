@@ -5,4 +5,5 @@ c_compiler_version:
 c_stdlib:
   - sysroot
 c_stdlib_version:
+  # 2.28: the kernel headers of the 2.17 sysroot lack __struct_group, used by test/fwctl.c. See the README.
   - '2.28'
