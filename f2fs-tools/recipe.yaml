@@ -38,6 +38,9 @@ tests:
 
 about:
   homepage: https://github.com/Sys-AI-Foundation/f2fs-tools
+  summary: Tools for the Flash-Friendly File System (F2FS), such as mkfs.f2fs and fsck.f2fs
+  # COPYING: the tools are GPL version 2; include/f2fs_fs.h and lib/libf2fs.c are also LGPL 2.1.
+  license: GPL-2.0-only
   license_file: COPYING
 
 extra:
